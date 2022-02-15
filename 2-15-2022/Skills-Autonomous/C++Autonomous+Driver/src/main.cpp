@@ -48,6 +48,13 @@ int multitask() {
 // Declaration of autonomous function/method.
 void Autonomous(void) {
   autonomousActive = true;
+      /* This task can run at the same time as another function/method.
+  As an example you can move the drive train and activate a conveyor belt or
+  fork lift at the same time similar to multithreading. But it executes the
+  multitask method/function so what ever's running in there will be ran at the
+  same time as the autonomous function/method. keep in mind that whatever
+  written in autonomous will be excuted at the same time.
+  */
   task myTask(multitask);
   if(!lr) {//lr = left
     MotorGroup5.setVelocity(83.14159265359, percent);
@@ -69,14 +76,7 @@ void Autonomous(void) {
   } 
 
 
-  /* This task can run at the same time as another function/method.
-  As an example you can move the drive train and activate a conveyor belt or
-  fork lift at the same time similar to multithreading. But it executes the
-  multitask method/function so what ever's running in there will be ran at the
-  same time as the autonomous function/method. keep in mind that whatever
-  written in autonomous will be excuted at the same time.
-  */
-  // Start of actual autonomous code...
+
   MotorGroup5.setVelocity(83.14159265359, percent);
   Motor9.setVelocity(100, percent);
   drive(sixfeet);
@@ -105,8 +105,6 @@ void DriverControl(void) {
 
   Controller1.rumble(rumblePulse);
   // This line makes the controller vibrate to let you know that the driver
-  // controls enabled.
-  // nothing more to code here...
 }
 void SystemChecks() {
   // System Checks Battery FieldControl etc ...
