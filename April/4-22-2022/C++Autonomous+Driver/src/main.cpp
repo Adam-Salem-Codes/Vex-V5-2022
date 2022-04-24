@@ -47,7 +47,7 @@ int* checkSpeed() {
   yspeed = Inertial.acceleration(yaxis),
   zspeed = Inertial.acceleration(zaxis);
   
-  static int speeds[] = { // This is static so I don't get a Warning from Clang
+  static int speeds[] = { // This is static so I don't get a Warning from Clang.
     xspeed,
     yspeed,
     zspeed
@@ -67,21 +67,33 @@ void Autonomous(void) {
   written in autonomous will be excuted at the same time. */
   task check(checkDegrees);
   task myTask(multitask);
-
   /* README: This autonomous code is current a prototype and probably doesn't work because
    I haven't gotten to test the code in weeks. So please don't steal this code it will just make
-   your robot worse. :/*/
+   your robot worse. :/ 
+
+
+   *** Left and right Autonomous Trick ***
+    How to easily convert a left side Autonomous to right side and vice versa.
+    The actual movement of the robot will stay the same because it's just moving forward.
+    The real thing you need to change is your turns because those have to change.
+
+    Heres where the trick comes in you can just invert your turns and it'll work the same
+    just on the other side; to invert an Integer or really any number you can multiply it by 
+    *1, and that will invert it example: 10*-1 = -10, -10*-1 = 10. So you can just copy and paste
+    your own autonomous code and multiply the TURN values by -1.
+   */
   if(!lr) {//lr = left
-  
+
     MotorGroup5.setVelocity(83.14159265359, percent);
     Motor9.setVelocity(100, percent);
     vex::task open(openClamp);
     open.stop();
-    Drivetrain.driveFor(f,  foot*34, i);
+    driveFor(f,  foot*4, i);
+    
     open.resume();
     vex::task close(closeClamp);
     wait(500, msec);
-    Drivetrain.driveFor(r, foot*4, i);
+    driveFor(r, foot*4, i);
     return;
   } 
 
@@ -91,10 +103,10 @@ void Autonomous(void) {
   Motor9.setVelocity(100, percent);
   MotorGroup5.setVelocity(83.14159265359, percent);
   vex::task open(openClamp);
-  Drivetrain.driveFor(f, foot*4, i);
+  driveFor(f, foot*4, i);
   vex::task close(closeClamp);
   wait(500, msec);
-  Drivetrain.driveFor(f, foot*4, i);
+  driveFor(f, foot*4, i);
   openClamp();
   /* Done with autonomous code for now when implementing
   other features later it will get more complex but for now this is the movement
@@ -132,6 +144,9 @@ void DriverControl(void) {
 }    
 
 turnType buttonInit() {
+  /* I need to implement a Skills Autonomous Selector because this is just selecting the side.
+ Over the Summer (It's 4-23-2022 Right now) I'll have access to a vEx v5 Brain 24/7 So I can refactor the code!
+  */
   Brain.Screen.setFillColor(red);
   Brain.Screen.drawRectangle(0, 0, SCREEN_X/2, SCREEN_Y/2);
   Brain.Screen.setCursor(3, 4);
@@ -140,17 +155,17 @@ turnType buttonInit() {
   Brain.Screen.drawRectangle(SCREEN_X / 2, 0, SCREEN_X / 2, SCREEN_Y / 2);
   Brain.Screen.setCursor(32, 4);
   Brain.Screen.print("RIGHT");
-    waitUntil(Brain.Screen.pressing());
+    waitUntil(Brain.Screen.pressing()); // Waits until the screen is being pressed
     do {
-      if(Brain.Screen.xPosition() < SCREEN_X / 2) {
+      if(Brain.Screen.xPosition() < SCREEN_X / 2) { // Checks if 
           Brain.Screen.setFillColor(red);
           Brain.Screen.drawRectangle(0, 0, SCREEN_X, SCREEN_Y / 2);
-          return vex::left; // adding the vex:: part because clang was giving an error std::left() and vex::left.                        
-       }//if
+          return vex::left; // Added the "vex::" part because clang was giving an error std::left() and vex::left. (I'm using the std namespace).                        
+       }
       else {
         Brain.Screen.setFillColor(blue);
         Brain.Screen.drawRectangle(0, 0, SCREEN_X, SCREEN_Y / 2);
-        return vex::right;//Same thing over here.
+        return vex::right; //Same thing over here. Comment: (Line: 163 Col: 32)
       }
     }
     while(Brain.Screen.pressing()); 
@@ -160,21 +175,20 @@ turnType buttonInit() {
 
 int main() {
   vexcodeInit(); // Initializing Robot Configuration. DO NOT REMOVE!
-  fourbarlift.setStopping(brakeType::hold);
-  Drivetrain.setDriveVelocity(100, percent);
-  MotorGroup5.setVelocity(100, percent);
-  // These lines set the velocity of the DriveTrain to 100% so it goes it
-  // fastest.
 
-  buttonInit() == vex::left ? lr = false : lr = true;
-  // Added ternary operator because it's clearer code than an if else statment.
-  SystemChecks();
-  fourbarlift.setVelocity(200, percent); 
+  fourbarlift.setStopping(brakeType::hold); // Holds four bar lift in place so it doesn't fall when you lift it.
+  fourbarlift.setVelocity(200, percent);
+  MotorGroup5.setVelocity(100, percent);
   Drivetrain.setDriveVelocity(200, percent);
   Motor9.setVelocity(200, percent);
-  Competition.autonomous(Autonomous);
-  Competition.drivercontrol(DriverControl);
-  while(1) {
-        task::sleep(100);//Sleep the task for a short amount of time to prevent wasted resources.
-    }
+  // These lines set the velocity of the Drivetrain to 100% so it goes it's fastest.
+
+  // Added ternary operator because it's clearer code than an if else statment.
+  buttonInit() == vex::left ? lr = false : lr = true;
+  
+  SystemChecks(); // Runs System Checks, Battery check etc...
+
+  Competition.autonomous(Autonomous); // Runs autonomous when activated in Competition.
+  Competition.drivercontrol(DriverControl); // Runs Driver when activated in Competition.
+  // I'm not sure why I had a while loop here and the comment but I don't think it's necessary.
 }

@@ -1,5 +1,5 @@
 #include "vex.h"
-
+#include "radian.h"
 vex::distanceUnits i = inches; // means the same thing as inches just faster to
                                // type i rather than inches.
 vex::directionType f = forward;
@@ -27,6 +27,13 @@ void driveFor(directionType direction, double distance, distanceUnits units) {
 }
 void driveFor(double distance, distanceUnits units, double velocity){
   Drivetrain.driveFor(distance, units, velocity);
+}
+void turnFor(radian r){
+  Drivetrain.turnFor(r.convertRadToDeg(r.getAngle()), rotationUnits::deg);
+}
+void turnFor(double r) {
+  radian r1 = radian(r);
+  Drivetrain.turnFor(r1.convertRadToDeg(r), rotationUnits::deg);
 }
 int openClamp() {
   Motor9.spinTo(openROT, degrees);
